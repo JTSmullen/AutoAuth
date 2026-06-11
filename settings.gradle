@@ -1,0 +1,3 @@
+rootProject.name = 'autoauth'
+
+include 'AutoAuth-Processor'
