@@ -9,13 +9,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import java.security.NoSuchAlgorithmException;
+
 @AutoConfiguration
 @EnableConfigurationProperties(AutoAuthProperties.class)
 public class AutoAuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public JwtKeyProvider (AutoAuthProperties properties) {
+  public JwtKeyProvider JwtKeyProvider(AutoAuthProperties properties) throws NoSuchAlgorithmException {
     return new JwtKeyProvider(properties);
   }
 

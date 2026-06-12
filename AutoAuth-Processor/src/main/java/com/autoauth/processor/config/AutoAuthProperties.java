@@ -9,7 +9,7 @@ import java.util.List;
   *
   * Configurations needed are a jwtSecret password to sign and verify JWT keys
   * Allowed origins
-  * Endpoints that you don't want to have a JWT token to get to. By default all Endpoints need a token.
+  * Endpoints that you don't want to have a JWT token to get to. By default, all Endpoints need a token.
 */
 
 @ConfigurationProperties(prefix = "autoauth")
@@ -26,12 +26,12 @@ public class AutoAuthProperties {
 
   // List of public Endpoints
   // eg. /v3/api-docs/** or /actuator/health
-  // If using the @PublicEndpoint on an indivudual path does not need to be listed here it will pick it up
+  // If using the @PublicEndpoint on an individual path does not need to be listed here it will pick it up
   private List<String> publicPaths = new ArrayList<>();
 
   // get | set
   public String getJwtSecret() { return jwtSecret; }
-  public void setJwtSecret(String jwtSecret) { this jwtSecret = jwtSecret; }
+  public void setJwtSecret(String jwtSecret) { this.jwtSecret = jwtSecret; }
 
   public long getExpirationMinutes() { return expirationMinutes; }
   public void setExpirationMinutes(long expirationMinutes) { this.expirationMinutes = expirationMinutes; }

@@ -1,6 +1,6 @@
 package com.autoauth.processor.jwt;
 
-import com.autoauth.model.AutoAuthUser;
+import com.autoauth.processor.model.AutoAuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +25,7 @@ public class JwtValidator {
       String userId = claims.getSubject();
 
       @SuppressWarnings("unchecked")
-      List<String> roles = claims.get("roles", List,class);
+      List<String> roles = claims.get("roles", List.class);
 
       return new AutoAuthUser(userId, roles != null ? roles : List.of());
     } catch (JwtException e) {

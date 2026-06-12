@@ -10,7 +10,7 @@ public class JwtGenerator {
   private final JwtKeyProvider keyProvider;
   private final AutoAuthProperties properties;
 
-  public JwtGenerator (JwtKeyProvider, AutoAuthProperties properties) {
+  public JwtGenerator (JwtKeyProvider keyProvider, AutoAuthProperties properties) {
     this.keyProvider = keyProvider;
     this.properties = properties;
   }

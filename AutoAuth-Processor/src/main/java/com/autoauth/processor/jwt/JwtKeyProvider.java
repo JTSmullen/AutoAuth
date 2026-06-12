@@ -12,7 +12,7 @@ public class JwtKeyProvider {
 
   private final SecretKey secretKey;
 
-  private JwtKeyProvider(AutoAuthProperties properties) {
+  public JwtKeyProvider(AutoAuthProperties properties) throws NoSuchAlgorithmException {
     String secret = properties.getJwtSecret();
 
     if (secret == null || secret.isBlank()) {
@@ -25,7 +25,7 @@ public class JwtKeyProvider {
 
       this.secretKey = Keys.hmacShaKeyFor(keyBytes);
 
-    catch (NoSuchAlgorithmException e) {
+    }catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("Failed to initialize JWT Key Provider", e);
     }
   }
