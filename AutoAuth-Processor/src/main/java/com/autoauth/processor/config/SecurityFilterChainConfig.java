@@ -4,8 +4,10 @@ import com.autoauth.processor.exception.AutoAuthAccessDeniedHandler;
 import com.autoauth.processor.exception.AutoAuthAuthenticationEntryPoint;
 import com.autoauth.processor.filter.JwtAuthenticationFilter;
 import com.autoauth.processor.jwt.JwtValidator;
+import com.autoauth.processor.util.EndpointScanner;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import java.util.ArrayList;
 
 @Configuration
 @EnableWebSecurity
@@ -25,10 +28,12 @@ public class SecurityFilterChainConfig {
 
     private final AutoAuthProperties properties;
     private final JwtValidator jwtValidator;
+    private final ApplicationContext applicationContext;
 
-    public SecurityFilterChainConfig(AutoAuthProperties properties, JwtValidator jwtValidator) {
+    public SecurityFilterChainConfig(AutoAuthProperties properties, JwtValidator jwtValidator, ApplicationContext applicationContext) {
         this.properties = properties;
         this.jwtValidator = jwtValidator;
+        this.applicationContext = applicationContext;
     }
 
     @Bean
@@ -37,6 +42,15 @@ public class SecurityFilterChainConfig {
         AutoAuthAuthenticationEntryPoint entryPoint = new AutoAuthAuthenticationEntryPoint();
         AutoAuthAccessDeniedHandler deniedHandler = new AutoAuthAccessDeniedHandler();
         JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtValidator);
+
+        EndpointScanner scanner = new EndpointScanner(applicationContext);
+        List<String> scannedPaths = scanner.getPublicPaths();
+
+        List<String> yamlPaths = properties.getPublicPaths();
+        if (yamlPaths == null) yamlPaths = new ArrayList<>();
+
+        List<String> allPublicPaths = new ArrayList<>(scannedPaths);
+        allPublicPaths.addAll(yamlPaths);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -47,10 +61,9 @@ public class SecurityFilterChainConfig {
                         .accessDeniedHandler(deniedHandler)
                 )
                 .authorizeHttpRequests(auth -> {
-                    List<String> publicPaths = properties.getPublicPaths();
 
-                    if (publicPaths != null && !publicPaths.isEmpty()) {
-                        auth.requestMatchers(publicPaths.toArray(new String[0])).permitAll();
+                    if (allPublicPaths.isEmpty()) {
+                        auth.requestMatchers(allPublicPaths.toArray(new String[0])).permitAll();
                     }
 
                     auth.anyRequest().authenticated();
