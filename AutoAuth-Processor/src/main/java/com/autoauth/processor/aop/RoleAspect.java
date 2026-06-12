@@ -52,8 +52,10 @@ public class RoleAspect {
             hasAccess = userRoles.containsAll(requiredRoles);
         } else {
             for (String role : requiredRoles) {
-                hasAccess = true;
-                break;
+                if (userRoles.contains(role)) {
+                    hasAccess = true;
+                    break;
+                }
             }
         }
 
