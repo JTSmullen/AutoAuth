@@ -62,7 +62,7 @@ public class SecurityFilterChainConfig {
                 )
                 .authorizeHttpRequests(auth -> {
 
-                    if (allPublicPaths.isEmpty()) {
+                    if (!allPublicPaths.isEmpty()) {
                         auth.requestMatchers(allPublicPaths.toArray(new String[0])).permitAll();
                     }
 
