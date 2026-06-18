@@ -52,6 +52,13 @@ public class SecurityFilterChainConfig {
         List<String> allPublicPaths = new ArrayList<>(scannedPaths);
         allPublicPaths.addAll(yamlPaths);
 
+        if (isSwaggerPresent()) {
+            allPublicPaths.add("/v3/api-docs/**");
+            allPublicPaths.add("/swagger-ui/**");
+            allPublicPaths.add("/swagger-ui.html");
+            System.out.println("[AutoAuth] Detected Swagger on classpath. Automatically whitelisted Swagger UI Paths.");
+        }
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -72,6 +79,17 @@ public class SecurityFilterChainConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+
+    }
+
+    private boolean isSwaggerPresent() {
+
+        try {
+            Class.forName("io.swagger.v3.oas.models.OpenAPI");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
 
     }
 

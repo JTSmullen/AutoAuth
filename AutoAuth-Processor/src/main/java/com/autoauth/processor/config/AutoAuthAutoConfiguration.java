@@ -4,6 +4,7 @@ import com.autoauth.processor.jwt.JwtGenerator;
 import com.autoauth.processor.jwt.JwtKeyProvider;
 import com.autoauth.processor.jwt.JwtValidator;
 import com.autoauth.processor.aop.RoleAspect;
+import com.autoauth.processor.config.AutoAuthSwaggerConfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,7 +17,7 @@ import java.security.NoSuchAlgorithmException;
 
 @AutoConfiguration
 @EnableConfigurationProperties(AutoAuthProperties.class)
-@Import(SecurityFilterChainConfig.class)
+@Import({SecurityFilterChainConfig.class, AutoAuthSwaggerConfig.class})
 @EnableAspectJAutoProxy
 public class AutoAuthAutoConfiguration {
 
