@@ -5,6 +5,7 @@ import com.autoauth.processor.model.AutoAuthUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.AfterEach;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,10 +28,12 @@ class JwtAuthenticationFilterTest {
     private MockHttpServletResponse response;
     private FilterChain mockFilterChain;
 
+    private static final String COOKIE_NAME = "my_token";
+
     @BeforeEach
     void setUp() {
         mockValidator = Mockito.mock(JwtValidator.class);
-        filter = new JwtAuthenticationFilter(mockValidator);
+        filter = new JwtAuthenticationFilter(mockValidator, COOKIE_NAME);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         mockFilterChain = Mockito.mock(FilterChain.class);
@@ -39,6 +42,51 @@ class JwtAuthenticationFilterTest {
     @AfterEach
     void tearDown() {
         SecurityContextHolder.clearContext();
+    }
+
+    // Import this at the top of your test file:
+    // import jakarta.servlet.http.Cookie;
+
+    @Test
+    void shouldAuthenticateWhenValidTokenIsProvidedInCookie() throws ServletException, IOException {
+        // Given: The filter is configured to look for "my_token"
+        filter = new JwtAuthenticationFilter(mockValidator, "my_token");
+
+        // Request contains a cookie with the correct name and token
+        request.setCookies(new Cookie("my_token", "valid-cookie-token"));
+
+        AutoAuthUser expectedUser = new AutoAuthUser("user123", List.of("admin"));
+        when(mockValidator.validateAndExtractUser("valid-cookie-token")).thenReturn(expectedUser);
+
+        // When
+        filter.doFilter(request, response, mockFilterChain);
+
+        // Then: User should be successfully authenticated
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
+        AutoAuthUser principal = (AutoAuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        assertEquals("user123", principal.userId());
+        verify(mockFilterChain).doFilter(request, response);
+    }
+
+    @Test
+    void shouldPreferHeaderOverCookieWhenBothArePresent() throws ServletException, IOException {
+        filter = new JwtAuthenticationFilter(mockValidator, "my_token");
+
+        // Request has BOTH a header and a cookie
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer header-token");
+        request.setCookies(new Cookie("my_token", "cookie-token"));
+
+        // Only the header token should be validated
+        AutoAuthUser expectedUser = new AutoAuthUser("user_header", List.of("user"));
+        when(mockValidator.validateAndExtractUser("header-token")).thenReturn(expectedUser);
+
+        // When
+        filter.doFilter(request, response, mockFilterChain);
+
+        // Then: Authenticated user should match the header token, NOT the cookie token
+        AutoAuthUser principal = (AutoAuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        assertEquals("user_header", principal.userId());
+        verify(mockFilterChain).doFilter(request, response);
     }
 
     @Test

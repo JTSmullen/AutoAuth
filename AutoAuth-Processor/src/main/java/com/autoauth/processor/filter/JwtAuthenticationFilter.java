@@ -3,6 +3,7 @@ package com.autoauth.processor.filter;
 import com.autoauth.processor.jwt.JwtValidator;
 import com.autoauth.processor.model.AutoAuthUser;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +21,11 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
     private final JwtValidator jwtValidator;
+    private final String cookieName;
 
-    public JwtAuthenticationFilter(JwtValidator jwtValidator) {
+    public JwtAuthenticationFilter(JwtValidator jwtValidator, String cookieName) {
         this.jwtValidator = jwtValidator;
+        this.cookieName = cookieName;
     }
 
     @Override
@@ -30,15 +33,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException
     {
+        String token = null;
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        }
+
+        if (token == null && cookieName != null && !cookieName.isBlank()) {
+            token = extractTokenFromCookie(request, cookieName);
+        }
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        String token = authHeader.substring(7);
 
         try {
 
@@ -60,6 +70,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
         filterChain.doFilter(request,response);
 
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+
+            for (Cookie cookie: cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+
+        }
+        return null;
     }
 
 }

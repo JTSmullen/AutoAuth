@@ -15,6 +15,12 @@ import java.util.List;
 @ConfigurationProperties(prefix = "autoauth")
 public class AutoAuthProperties {
 
+  /**
+   * Optional: The name of the HttpOnly cookie containing the JWT
+   *  If configured, the filter will automatically check cookies as a fallback
+   */
+  private String cookieName;
+
   // The secret key to sign and verify the JWT
   // Must be > 32 characters long for HMAC-SHA256
   private String jwtSecret;
@@ -41,4 +47,7 @@ public class AutoAuthProperties {
 
   public List<String> getPublicPaths() { return publicPaths; }
   public void setPublicPaths(List<String> publicPaths) { this.publicPaths = publicPaths; }
+
+  public String getCookieName() { return cookieName; }
+  public void setCookieName(String cookieName) { this.cookieName = cookieName; }
 }

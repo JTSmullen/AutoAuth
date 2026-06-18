@@ -41,7 +41,7 @@ public class SecurityFilterChainConfig {
 
         AutoAuthAuthenticationEntryPoint entryPoint = new AutoAuthAuthenticationEntryPoint();
         AutoAuthAccessDeniedHandler deniedHandler = new AutoAuthAccessDeniedHandler();
-        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtValidator);
+        JwtAuthenticationFilter jwtFilter = new JwtAuthenticationFilter(jwtValidator, properties.getCookieName());
 
         EndpointScanner scanner = new EndpointScanner(applicationContext);
         List<String> scannedPaths = scanner.getPublicPaths();
