@@ -27,5 +27,11 @@ public class AuthContext {
                 .orElse(null);
         
     }
+
+    public static Object getCustomClaims(String claimKey) {
+        return getCurrentUser()
+                .map(user -> user.customClaims().get(claimKey))
+                .orElse(null);
+    }
     
 }

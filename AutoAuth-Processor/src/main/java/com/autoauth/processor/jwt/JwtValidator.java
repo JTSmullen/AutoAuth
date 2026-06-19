@@ -27,7 +27,15 @@ public class JwtValidator {
       @SuppressWarnings("unchecked")
       List<String> roles = claims.get("roles", List.class);
 
+      java.util.Map<String, Object> customClaims = new java.util.HashMap<>(claims);
+
+      customClaims.remove(Claims.SUBJECT);
+      customClaims.remove(Claims.EXPIRATION);
+      customClaims.remove(Claims.ISSUED_AT);
+      customClaims.remove("roles");
+
       return new AutoAuthUser(userId, roles != null ? roles : List.of());
+
     } catch (JwtException e) {
       throw new IllegalArgumentException("Invalid or expired JWT: " + e.getMessage());
     }

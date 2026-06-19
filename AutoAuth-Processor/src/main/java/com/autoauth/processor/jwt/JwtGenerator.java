@@ -18,11 +18,17 @@ public class JwtGenerator {
   public String generateToken (AutoAuthUser user) {
     long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
 
-    return Jwts.builder()
+    var builder = Jwts.builder()
       .subject(user.userId())
       .claim("roles", user.roles())
       .issuedAt(new Date())
       .expiration(new Date(expirationTimeMillis))
+
+    if (user.customClaims() != null) {
+      user.customClaims().forEach(builder::claim);
+    }
+
+    return builder
       .signWith(keyProvider.getKey(), Jwts.SIG.HS256)
       .compact();
   }
