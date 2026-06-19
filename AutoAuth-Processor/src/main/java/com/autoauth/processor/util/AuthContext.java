@@ -20,18 +20,16 @@ public class AuthContext {
         
     }
     
-    public static String getCurrentUserId() {
+    public static Optional<String> getCurrentUserId() {
         
         return getCurrentUser()
-                .map(AutoAuthUser::userId)
-                .orElse(null);
+                .map(AutoAuthUser::userId);
         
     }
 
-    public static Object getCustomClaims(String claimKey) {
+    public static Optional<Object> getCustomClaims(String claimKey) {
         return getCurrentUser()
-                .map(user -> user.customClaims().get(claimKey))
-                .orElse(null);
+                .map(user -> user.customClaims().get(claimKey));
     }
     
 }
