@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | SecurityException e) {
 
             SecurityContextHolder.clearContext();
 
