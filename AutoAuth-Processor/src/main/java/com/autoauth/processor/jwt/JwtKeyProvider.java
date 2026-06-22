@@ -1,36 +1,42 @@
 package com.autoauth.processor.jwt;
 
 import com.autoauth.processor.config.AutoAuthProperties;
+import com.autoauth.processor.util.KeyLoader;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 public class JwtKeyProvider {
 
-  private final SecretKey secretKey;
+  private PrivateKey privateKey;
+  private PublicKey publicKey;
 
   public JwtKeyProvider(AutoAuthProperties properties) throws NoSuchAlgorithmException {
-    String secret = properties.getJwtSecret();
-
-    if (secret == null || secret.isBlank()) {
-      throw new IllegalStateException("AutoAuth: 'autoauth.jwt-secret' is missing from the application properties! You must set a secret to generate JWTs.");
+    if (properties.getPrivateKey() != null && !properties.getPrivateKey().isBlank()) {
+      this.privateKey = KeyLoader.loadPrivateKey(properties.getPrivateKey());
     }
 
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      byte[] keyBytes = digest.digest(secret.getBytes(StandardCharsets.UTF_8));
-
-      this.secretKey = Keys.hmacShaKeyFor(keyBytes);
-
-    }catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException("Failed to initialize JWT Key Provider", e);
+    if (properties.getPublicKey() != null && !properties.getPublicKey().isBlank()) {
+      this.publicKey = KeyLoader.loadPublicKey(properties.getPublicKey());
     }
   }
 
-  public SecretKey getKey() {
-    return this.secretKey;
+  public PrivateKey getPrivateKey() {
+    if(privateKey == null) {
+      throw new IllegalStateException("RSA Private key is not configured | cannot generate tokens");
+    }
+    return privateKey;
+  }
+
+  public PublicKey getPublicKey() {
+    if(publicKey == null) {
+      throw new IllegalStateException("RSA public key is not configured. Cannot validate tokens");
+    }
+    return publicKey;
   }
 }
