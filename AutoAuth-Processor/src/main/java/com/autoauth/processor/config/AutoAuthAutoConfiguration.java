@@ -2,6 +2,7 @@ package com.autoauth.processor.config;
 
 import com.autoauth.processor.blacklist.CafeTokenBlackList;
 import com.autoauth.processor.blacklist.TokenBlackList;
+import com.autoauth.processor.controller.JwksController;
 import com.autoauth.processor.jwt.JwtGenerator;
 import com.autoauth.processor.jwt.JwtKeyProvider;
 import com.autoauth.processor.jwt.JwtValidator;
@@ -10,6 +11,7 @@ import com.autoauth.processor.config.AutoAuthSwaggerConfig;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -45,6 +47,12 @@ public class AutoAuthAutoConfiguration {
   @ConditionalOnMissingBean(TokenBlackList.class)
   public TokenBlackList tokenBlackList() {
     return new CafeTokenBlackList();
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "autoauth.public-key")
+  public JwksController jwksController(JwtKeyProvider keyProvider) {
+    return new JwksController(keyProvider);
   }
 
   @Bean
