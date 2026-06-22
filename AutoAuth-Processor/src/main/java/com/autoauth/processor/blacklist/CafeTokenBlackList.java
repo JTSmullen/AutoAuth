@@ -7,7 +7,6 @@ import java.time.Duration;
 
 public class CafeTokenBlackList implements TokenBlackList {
 
-    // Cache stores JTI -> Expiration Time (in nanoseconds)
     private final Cache<String, Long> cache = Caffeine.newBuilder()
             .expireAfter(new Expiry<String, Long>() {
                 @Override

@@ -1,5 +1,6 @@
 package com.autoauth.processor.config;
 
+import com.autoauth.processor.blacklist.CafeTokenBlackList;
 import com.autoauth.processor.blacklist.TokenBlackList;
 import com.autoauth.processor.jwt.JwtGenerator;
 import com.autoauth.processor.jwt.JwtKeyProvider;
@@ -38,6 +39,12 @@ public class AutoAuthAutoConfiguration {
   @ConditionalOnMissingBean
   public JwtGenerator jwtGenerator(JwtKeyProvider keyProvider, AutoAuthProperties properties) {
     return new JwtGenerator(keyProvider, properties);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean(TokenBlackList.class)
+  public TokenBlackList tokenBlackList() {
+    return new CafeTokenBlackList();
   }
 
   @Bean
