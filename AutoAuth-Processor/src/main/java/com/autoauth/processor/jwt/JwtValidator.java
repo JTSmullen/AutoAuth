@@ -1,17 +1,24 @@
 package com.autoauth.processor.jwt;
 
+import com.autoauth.processor.blacklist.TokenBlackList;
 import com.autoauth.processor.model.AutoAuthUser;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 public class JwtValidator {
   private final JwtKeyProvider keyProvider;
+  private final TokenBlackList blackList;
 
-  public JwtValidator(JwtKeyProvider keyProvider) {
+  public JwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList) {
     this.keyProvider = keyProvider;
+    this.blackList = blackList;
   }
 
   public AutoAuthUser validateAndExtractUser(String token) {
@@ -21,6 +28,11 @@ public class JwtValidator {
         .build()
         .parseSignedClaims(token)
         .getPayload();
+
+      String jti = claims.getId();
+      if (jti != null && blackList.isBlackListed(jti)) {
+        throw new SecurityException("Token has been revoked");
+      }
 
       String userId = claims.getSubject();
 
@@ -32,12 +44,43 @@ public class JwtValidator {
       customClaims.remove(Claims.SUBJECT);
       customClaims.remove(Claims.EXPIRATION);
       customClaims.remove(Claims.ISSUED_AT);
+      customClaims.remove(Claims.ID);
       customClaims.remove("roles");
 
-      return new AutoAuthUser(userId, roles != null ? roles : List.of());
+      return new AutoAuthUser(userId, roles != null ? roles : List.of(), customClaims);
 
     } catch (JwtException e) {
       throw new IllegalArgumentException("Invalid or expired JWT: " + e.getMessage());
+    }
+  }
+
+  public void revokeToken(String token) {
+    try {
+      Claims claims = Jwts.parser()
+              .verifyWith(keyProvider.getKey())
+              .build()
+              .parseSignedClaims(token)
+              .getPayload();
+
+      String jti = claims.getId();
+      if (jti == null) {
+        throw new IllegalArgumentException("Token does not contain a JWT ID (jti) and cannot be revoked");
+      }
+
+      Date expiration = claims.getExpiration();
+
+      if (expiration != null) {
+        Instant expiresAt = expiration.toInstant();
+        Instant now = Instant.now();
+
+        if (expiresAt.isAfter(now)) {
+          Duration ttl = Duration.between(now, expiresAt);
+          blackList.add(jti, ttl);
+        }
+      }
+    } catch (ExpiredJwtException ignored) {
+    } catch (JwtException e) {
+      throw new IllegalArgumentException("Invalid JWT provided for revocation: " + e.getMessage());
     }
   }
 }

@@ -55,7 +55,7 @@ class JwtAuthenticationFilterTest {
         // Request contains a cookie with the correct name and token
         request.setCookies(new Cookie("my_token", "valid-cookie-token"));
 
-        AutoAuthUser expectedUser = new AutoAuthUser("user123", List.of("admin"));
+        AutoAuthUser expectedUser = new AutoAuthUser("user123", List.of("admin"), null);
         when(mockValidator.validateAndExtractUser("valid-cookie-token")).thenReturn(expectedUser);
 
         // When
@@ -77,7 +77,7 @@ class JwtAuthenticationFilterTest {
         request.setCookies(new Cookie("my_token", "cookie-token"));
 
         // Only the header token should be validated
-        AutoAuthUser expectedUser = new AutoAuthUser("user_header", List.of("user"));
+        AutoAuthUser expectedUser = new AutoAuthUser("user_header", List.of("user"), null);
         when(mockValidator.validateAndExtractUser("header-token")).thenReturn(expectedUser);
 
         // When
@@ -93,7 +93,7 @@ class JwtAuthenticationFilterTest {
     void shouldAuthenticateWhenValidTokenIsProvided() throws ServletException, IOException {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer valid-token-string");
 
-        AutoAuthUser expectedUser = new AutoAuthUser("user123", List.of("admin"));
+        AutoAuthUser expectedUser = new AutoAuthUser("user123", List.of("admin"), null);
         when(mockValidator.validateAndExtractUser("valid-token-string")).thenReturn(expectedUser);
 
         filter.doFilter(request, response, mockFilterChain);

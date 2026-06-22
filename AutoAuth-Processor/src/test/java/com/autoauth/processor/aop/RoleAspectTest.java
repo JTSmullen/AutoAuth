@@ -74,7 +74,7 @@ class RoleAspectTest {
     }
 
     private void setCurrentUser(String userId, List<String> roles) {
-        AutoAuthUser user = new AutoAuthUser(userId, roles);
+        AutoAuthUser user = new AutoAuthUser(userId, roles, null);
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(user, null, List.of());
         SecurityContextHolder.getContext().setAuthentication(auth);

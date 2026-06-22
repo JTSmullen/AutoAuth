@@ -1,5 +1,6 @@
 package com.autoauth.processor.config;
 
+import com.autoauth.processor.blacklist.TokenBlackList;
 import com.autoauth.processor.jwt.JwtGenerator;
 import com.autoauth.processor.jwt.JwtKeyProvider;
 import com.autoauth.processor.jwt.JwtValidator;
@@ -41,8 +42,8 @@ public class AutoAuthAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public JwtValidator jwtValidator(JwtKeyProvider keyProvider) {
-    return new JwtValidator(keyProvider);
+  public JwtValidator jwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList) {
+    return new JwtValidator(keyProvider, blackList);
   }
   
 }
