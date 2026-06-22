@@ -5,6 +5,7 @@ import com.autoauth.processor.model.AutoAuthUser;
 import io.jsonwebtoken.Jwts;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class JwtGenerator {
   private final JwtKeyProvider keyProvider;
@@ -19,10 +20,11 @@ public class JwtGenerator {
     long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
 
     var builder = Jwts.builder()
+      .id(UUID.randomUUID().toString())
       .subject(user.userId())
       .claim("roles", user.roles())
       .issuedAt(new Date())
-      .expiration(new Date(expirationTimeMillis))
+      .expiration(new Date(expirationTimeMillis));
 
     if (user.customClaims() != null) {
       user.customClaims().forEach(builder::claim);
