@@ -1,5 +1,6 @@
 package com.autoauth.processor.filter;
 
+import com.autoauth.processor.exception.TokenRevokedException;
 import com.autoauth.processor.jwt.JwtValidator;
 import com.autoauth.processor.model.AutoAuthUser;
 
@@ -9,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        } catch (IllegalArgumentException | SecurityException e) {
+        } catch (IllegalArgumentException e) {
 
             SecurityContextHolder.clearContext();
 

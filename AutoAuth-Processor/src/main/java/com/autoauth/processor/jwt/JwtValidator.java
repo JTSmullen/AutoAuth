@@ -1,11 +1,13 @@
 package com.autoauth.processor.jwt;
 
 import com.autoauth.processor.blacklist.TokenBlackList;
+import com.autoauth.processor.exception.TokenRevokedException;
 import com.autoauth.processor.model.AutoAuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -31,7 +33,7 @@ public class JwtValidator {
 
       String jti = claims.getId();
       if (jti != null && blackList.isBlackListed(jti)) {
-        throw new SecurityException("Token has been revoked");
+        throw new TokenRevokedException("Token has been revoked");
       }
 
       String userId = claims.getSubject();
@@ -49,7 +51,7 @@ public class JwtValidator {
 
       return new AutoAuthUser(userId, roles != null ? roles : List.of(), customClaims);
 
-    } catch (JwtException e) {
+    } catch (JwtException | TokenRevokedException e) {
       throw new IllegalArgumentException("Invalid or expired JWT: " + e.getMessage());
     }
   }

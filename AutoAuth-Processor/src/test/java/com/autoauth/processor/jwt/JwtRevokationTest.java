@@ -58,12 +58,13 @@ class JwtTokenRevocationTest {
         // Act: Revoke the token
         validator.revokeToken(token);
 
-        // Assert: Attempting to validate it now should throw a SecurityException
-        SecurityException exception = assertThrows(SecurityException.class, () ->
+        // Assert: Attempting to validate it now throws an IllegalArgumentException due to the catch block wrapping
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 validator.validateAndExtractUser(token)
         );
 
-        assertEquals("Token has been revoked", exception.getMessage());
+        // Matches the message pattern from your catch block: "Invalid or expired JWT: " + e.getMessage()
+        assertEquals("Invalid or expired JWT: Token has been revoked", exception.getMessage());
     }
 
     @Test
@@ -108,8 +109,8 @@ class JwtTokenRevocationTest {
         // Act: Revoke ONLY token 1
         validator.revokeToken(token1);
 
-        // Assert: Token 1 is dead, but Token 2 is still valid (because of unique jti UUIDs!)
-        assertThrows(SecurityException.class, () -> validator.validateAndExtractUser(token1));
+        // Assert: Token 1 throws IllegalArgumentException (not SecurityException anymore), but Token 2 is valid
+        assertThrows(IllegalArgumentException.class, () -> validator.validateAndExtractUser(token1));
         assertDoesNotThrow(() -> validator.validateAndExtractUser(token2));
     }
 }
