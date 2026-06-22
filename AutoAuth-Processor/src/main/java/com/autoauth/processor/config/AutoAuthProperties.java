@@ -15,27 +15,19 @@ import java.util.List;
 @ConfigurationProperties(prefix = "autoauth")
 public class AutoAuthProperties {
 
-  /**
-   * Optional: The name of the HttpOnly cookie containing the JWT
-   *  If configured, the filter will automatically check cookies as a fallback
-   */
+  private String privateKey;
+  private String publicKey;
+
   private String cookieName;
 
-  // The secret key to sign and verify the JWT
-  // Must be > 32 characters long for HMAC-SHA256
   private String jwtSecret;
 
   private long expirationMinutes = 60;
 
-  // Allowed origins for CORS
   private List<String> allowedOrigins = new ArrayList<>();
 
-  // List of public Endpoints
-  // eg. /v3/api-docs/** or /actuator/health
-  // If using the @PublicEndpoint on an individual path does not need to be listed here it will pick it up
   private List<String> publicPaths = new ArrayList<>();
 
-  // get | set
   public String getJwtSecret() { return jwtSecret; }
   public void setJwtSecret(String jwtSecret) { this.jwtSecret = jwtSecret; }
 
@@ -50,4 +42,10 @@ public class AutoAuthProperties {
 
   public String getCookieName() { return cookieName; }
   public void setCookieName(String cookieName) { this.cookieName = cookieName; }
+
+  public String getPrivateKey() { return privateKey; }
+  public void setPrivateKey(String privateKey) { this.privateKey = privateKey; }
+
+  public String getPublicKey() { return publicKey; }
+  public void setPublicKey(String publicKey) { this.publicKey = publicKey; }
 }
