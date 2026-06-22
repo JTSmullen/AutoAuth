@@ -7,7 +7,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
 
-public class AutoAuthAccessDeniedHandler implements  AccessDeniedHandler{
+public class AutoAuthAccessDeniedHandler implements  AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {

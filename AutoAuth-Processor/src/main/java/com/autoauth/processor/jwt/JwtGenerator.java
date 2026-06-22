@@ -31,7 +31,7 @@ public class JwtGenerator {
     }
 
     return builder
-      .signWith(keyProvider.getKey(), Jwts.SIG.HS256)
+      .signWith(keyProvider.getPrivateKey(), Jwts.SIG.RS256)
       .compact();
   }
 }

@@ -26,7 +26,7 @@ public class JwtValidator {
   public AutoAuthUser validateAndExtractUser(String token) {
     try {
       Claims claims = Jwts.parser()
-        .verifyWith(keyProvider.getKey())
+        .verifyWith(keyProvider.getPublicKey())
         .build()
         .parseSignedClaims(token)
         .getPayload();
@@ -59,7 +59,7 @@ public class JwtValidator {
   public void revokeToken(String token) {
     try {
       Claims claims = Jwts.parser()
-              .verifyWith(keyProvider.getKey())
+              .verifyWith(keyProvider.getPublicKey())
               .build()
               .parseSignedClaims(token)
               .getPayload();
