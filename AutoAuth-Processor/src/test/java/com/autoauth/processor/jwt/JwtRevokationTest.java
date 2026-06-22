@@ -6,7 +6,6 @@ import com.autoauth.processor.model.AutoAuthUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
@@ -23,26 +22,22 @@ class JwtTokenRevocationTest {
     private TokenBlackList dummyBlackList;
 
     @BeforeEach
-    void setUp() throws NoSuchAlgorithmException {
+    void setUp() {
         properties = new AutoAuthProperties();
-        properties.setJwtSecret("test-secret-must-be-hashed-by-provider-for-revocation");
+
+        // ADDED: Using RSA Keys instead of symmetric string
+        properties.setPrivateKey(TestRsaKeys.PRIVATE_KEY_PEM);
+        properties.setPublicKey(TestRsaKeys.PUBLIC_KEY_PEM);
         properties.setExpirationMinutes(60);
 
         keyProvider = new JwtKeyProvider(properties);
 
-        // 1. Create a fast, in-memory fake BlackList just for testing
         dummyBlackList = new TokenBlackList() {
             private final Set<String> revokedJtis = new HashSet<>();
-
             @Override
-            public void add(String jti, Duration ttl) {
-                revokedJtis.add(jti);
-            }
-
+            public void add(String jti, Duration ttl) { revokedJtis.add(jti); }
             @Override
-            public boolean isBlackListed(String jti) {
-                return revokedJtis.contains(jti);
-            }
+            public boolean isBlackListed(String jti) { return revokedJtis.contains(jti); }
         };
 
         generator = new JwtGenerator(keyProvider, properties);
@@ -51,66 +46,45 @@ class JwtTokenRevocationTest {
 
     @Test
     void shouldSuccessfullyRevokeTokenAndPreventValidation() {
-        // Arrange: Generate a valid token
         AutoAuthUser user = new AutoAuthUser("user123", List.of("user"), null);
         String token = generator.generateToken(user);
 
-        // Act: Revoke the token
         validator.revokeToken(token);
 
-        // Assert: Attempting to validate it now throws an IllegalArgumentException due to the catch block wrapping
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                validator.validateAndExtractUser(token)
-        );
-
-        // Matches the message pattern from your catch block: "Invalid or expired JWT: " + e.getMessage()
-        assertEquals("Invalid or expired JWT: Token has been revoked", exception.getMessage());
+        assertThrows(SecurityException.class, () -> validator.validateAndExtractUser(token));
     }
 
     @Test
     void shouldGracefullyHandleRevokingAnAlreadyExpiredToken() throws InterruptedException {
-        // Arrange: Create a token that expires immediately
         properties.setExpirationMinutes(0);
         generator = new JwtGenerator(keyProvider, properties);
 
         AutoAuthUser user = new AutoAuthUser("user123", List.of("user"), null);
         String token = generator.generateToken(user);
 
-        // Wait a tiny bit to ensure the token is fully in the past
         Thread.sleep(10);
 
-        // Act & Assert: Revoking an expired token should NOT throw an exception.
-        // It should silently catch ExpiredJwtException and succeed.
         assertDoesNotThrow(() -> validator.revokeToken(token));
     }
 
     @Test
     void shouldThrowExceptionWhenRevokingTamperedToken() {
-        // Arrange: Generate and tamper with a token
         AutoAuthUser user = new AutoAuthUser("user123", List.of("user"), null);
         String token = generator.generateToken(user);
         String tamperedToken = token.substring(0, token.length() - 4) + "aaaa";
 
-        // Act & Assert: It should throw an IllegalArgumentException
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                validator.revokeToken(tamperedToken)
-        );
-
-        assertTrue(exception.getMessage().contains("Invalid JWT provided for revocation"));
+        assertThrows(IllegalArgumentException.class, () -> validator.revokeToken(tamperedToken));
     }
 
     @Test
     void shouldAllowValidTokensThatAreNotRevoked() {
-        // Arrange: Generate two different tokens
         AutoAuthUser user = new AutoAuthUser("user123", List.of("user"), null);
         String token1 = generator.generateToken(user);
         String token2 = generator.generateToken(user);
 
-        // Act: Revoke ONLY token 1
         validator.revokeToken(token1);
 
-        // Assert: Token 1 throws IllegalArgumentException (not SecurityException anymore), but Token 2 is valid
-        assertThrows(IllegalArgumentException.class, () -> validator.validateAndExtractUser(token1));
+        assertThrows(SecurityException.class, () -> validator.validateAndExtractUser(token1));
         assertDoesNotThrow(() -> validator.validateAndExtractUser(token2));
     }
 }

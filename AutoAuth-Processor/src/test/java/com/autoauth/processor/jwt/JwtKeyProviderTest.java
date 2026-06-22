@@ -4,9 +4,6 @@ import com.autoauth.processor.config.AutoAuthProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtKeyProviderTest {
@@ -15,42 +12,47 @@ class JwtKeyProviderTest {
 
     @BeforeEach
     void setUp() {
-
         properties = new AutoAuthProperties();
-
     }
 
     @Test
-    void shouldThrowExceptionWhenSecretIsMissing() {
-
-        properties.setJwtSecret(null);
-
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> new JwtKeyProvider(properties));
-
-        assertTrue(exception.getMessage().contains("autoauth.jwt-secret"));
-
-    }
-
-    @Test
-    void shouldThrowExceptionWhenSecretIsBlack() {
-
-        properties.setJwtSecret("   ");
-
-        assertThrows(IllegalStateException.class, () -> new JwtKeyProvider(properties));
-
-    }
-
-    @Test
-    void shouldGenerateKeyWhenSecretIsValid() throws NoSuchAlgorithmException {
-
-        properties.setJwtSecret("my-temporary-secret-key-for-testing");
-
+    void shouldThrowExceptionWhenRetrievingMissingPrivateKey() {
+        properties.setPrivateKey(null);
         JwtKeyProvider keyProvider = new JwtKeyProvider(properties);
-        SecretKey key = keyProvider.getKey();
 
-        assertNotNull(key);
-        assertEquals("HmacSHA256", key.getAlgorithm());
-
+        assertThrows(IllegalStateException.class, keyProvider::getPrivateKey);
     }
 
+    @Test
+    void shouldThrowExceptionWhenRetrievingMissingPublicKey() {
+        properties.setPublicKey("   ");
+        JwtKeyProvider keyProvider = new JwtKeyProvider(properties);
+
+        assertThrows(IllegalStateException.class, keyProvider::getPublicKey);
+    }
+
+    @Test
+    void shouldSuccessfullyLoadPrivateKey() {
+        properties.setPrivateKey(TestRsaKeys.PRIVATE_KEY_PEM);
+        JwtKeyProvider keyProvider = new JwtKeyProvider(properties);
+
+        assertNotNull(keyProvider.getPrivateKey());
+        assertEquals("RSA", keyProvider.getPrivateKey().getAlgorithm());
+    }
+
+    @Test
+    void shouldSuccessfullyLoadPublicKey() {
+        properties.setPublicKey(TestRsaKeys.PUBLIC_KEY_PEM);
+        JwtKeyProvider keyProvider = new JwtKeyProvider(properties);
+
+        assertNotNull(keyProvider.getPublicKey());
+        assertEquals("RSA", keyProvider.getPublicKey().getAlgorithm());
+    }
+
+    @Test
+    void shouldThrowExceptionOnMalformedPemString() {
+        properties.setPublicKey("-----BEGIN PUBLIC KEY-----\nNotABase64String!\n-----END PUBLIC KEY-----");
+
+        assertThrows(IllegalArgumentException.class, () -> new JwtKeyProvider(properties));
+    }
 }

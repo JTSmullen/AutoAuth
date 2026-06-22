@@ -16,7 +16,7 @@ public class JwtKeyProvider {
   private PrivateKey privateKey;
   private PublicKey publicKey;
 
-  public JwtKeyProvider(AutoAuthProperties properties) throws NoSuchAlgorithmException {
+  public JwtKeyProvider(AutoAuthProperties properties) {
     if (properties.getPrivateKey() != null && !properties.getPrivateKey().isBlank()) {
       this.privateKey = KeyLoader.loadPrivateKey(properties.getPrivateKey());
     }
