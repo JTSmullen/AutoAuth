@@ -2,6 +2,7 @@ package com.autoauth.processor.jwt;
 
 import com.autoauth.processor.config.AutoAuthProperties;
 import com.autoauth.processor.model.AutoAuthUser;
+import com.autoauth.processor.model.TokenPair;
 import io.jsonwebtoken.Jwts;
 
 import java.util.Date;
@@ -16,22 +17,41 @@ public class JwtGenerator {
     this.properties = properties;
   }
 
-  public String generateToken (AutoAuthUser user) {
+  public String generateAccessToken(AutoAuthUser user){
     long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
 
     var builder = Jwts.builder()
-      .id(UUID.randomUUID().toString())
-      .subject(user.userId())
-      .claim("roles", user.roles())
-      .issuedAt(new Date())
-      .expiration(new Date(expirationTimeMillis));
+            .id(UUID.randomUUID().toString())
+            .subject(user.userId())
+            .claim("type", "access")
+            .claim("roles", user.roles())
+            .issuedAt(new Date())
+            .expiration(new Date(expirationTimeMillis));
 
     if (user.customClaims() != null) {
       user.customClaims().forEach(builder::claim);
     }
 
     return builder
-      .signWith(keyProvider.getPrivateKey(), Jwts.SIG.RS256)
-      .compact();
+            .signWith(keyProvider.getPrivateKey(), Jwts.SIG.RS256)
+            .compact();
+  }
+
+  public String generateRefreshToken(AutoAuthUser user) {
+
+    long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
+
+    return Jwts.builder()
+            .id(UUID.randomUUID().toString())
+            .subject(user.userId())
+            .claim("type", "refresh")
+            .issuedAt(new Date())
+            .expiration(new Date(expirationTimeMillis))
+            .signWith(keyProvider.getPrivateKey(), Jwts.SIG.RS256)
+            .compact();
+  }
+
+  public TokenPair generateTokenPair(AutoAuthUser user) {
+    return new TokenPair(generateAccessToken(user), generateRefreshToken(user));
   }
 }
