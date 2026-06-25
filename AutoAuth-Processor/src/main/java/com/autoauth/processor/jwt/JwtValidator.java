@@ -7,7 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import org.springframework.security.authentication.BadCredentialsException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,10 +25,10 @@ public class JwtValidator {
   public AutoAuthUser validateAndExtractUser(String token) {
     try {
       Claims claims = Jwts.parser()
-        .verifyWith(keyProvider.getPublicKey())
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
+              .verifyWith(keyProvider.getPublicKey())
+              .build()
+              .parseSignedClaims(token)
+              .getPayload();
 
       String jti = claims.getId();
       if (jti != null && blackList.isBlackListed(jti)) {
@@ -51,7 +50,9 @@ public class JwtValidator {
 
       return new AutoAuthUser(userId, roles != null ? roles : List.of(), customClaims);
 
-    } catch (JwtException | TokenRevokedException e) {
+    } catch (TokenRevokedException e) {
+      throw new SecurityException("Invalid or expired JWT: " + e.getMessage());
+    } catch (JwtException e) {
       throw new IllegalArgumentException("Invalid or expired JWT: " + e.getMessage());
     }
   }
