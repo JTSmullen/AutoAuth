@@ -22,7 +22,8 @@ public class AutoAuthProperties {
 
   private String jwtSecret;
 
-  private long expirationMinutes = 60;
+  private long expirationMinutes = 15;
+  private long refreshExpirationMinutes = 10080;
 
   private List<String> allowedOrigins = new ArrayList<>();
 
@@ -48,4 +49,7 @@ public class AutoAuthProperties {
 
   public String getPublicKey() { return publicKey; }
   public void setPublicKey(String publicKey) { this.publicKey = publicKey; }
+
+  public long getRefreshExpirationMinutes() { return refreshExpirationMinutes; }
+  public void setRefreshExpirationMinutes(long refreshExpirationMinutes) { this.refreshExpirationMinutes = refreshExpirationMinutes; }
 }
