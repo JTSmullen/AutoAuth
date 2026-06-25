@@ -23,12 +23,21 @@ public class JwtValidator {
   }
 
   public AutoAuthUser validateAndExtractUser(String token) {
+    return validateAndExtractUser(token, "access");
+  }
+
+  public AutoAuthUser validateAndExtractUser(String token, String expectedType) {
     try {
       Claims claims = Jwts.parser()
               .verifyWith(keyProvider.getPublicKey())
               .build()
               .parseSignedClaims(token)
               .getPayload();
+
+      String tokenType = claims.get("type", String.class);
+      if (!expectedType.equals(tokenType)) {
+        throw new SecurityException("Invalid token type. Expected: : " + expectedType);
+      }
 
       String jti = claims.getId();
       if (jti != null && blackList.isBlackListed(jti)) {
@@ -47,6 +56,7 @@ public class JwtValidator {
       customClaims.remove(Claims.ISSUED_AT);
       customClaims.remove(Claims.ID);
       customClaims.remove("roles");
+      customClaims.remove("type");
 
       return new AutoAuthUser(userId, roles != null ? roles : List.of(), customClaims);
 
