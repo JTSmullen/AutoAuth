@@ -39,7 +39,7 @@ public class JwtGenerator {
 
   public String generateRefreshToken(AutoAuthUser user) {
 
-    long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
+    long expirationTimeMillis = System.currentTimeMillis() + (properties.getRefreshExpirationMinutes() * 60 * 1000);
 
     return Jwts.builder()
             .id(UUID.randomUUID().toString())
