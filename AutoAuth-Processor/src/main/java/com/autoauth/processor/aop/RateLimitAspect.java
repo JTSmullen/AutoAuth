@@ -47,7 +47,7 @@ public class RateLimitAspect {
         Optional<String> userId = AuthContext.getCurrentUserId();
 
         if (userId.isPresent()) {
-            callerKey = "user:" + userId;
+            callerKey = "user:" + userId.get();
         } else {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
