@@ -1,6 +1,7 @@
 package com.autoauth.processor.aop;
 
 import com.autoauth.processor.annotation.RateLimit;
+import com.autoauth.processor.exception.RateLimitExceededException;
 import com.autoauth.processor.ratelimit.RateLimitService;
 import com.autoauth.processor.util.AuthContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,19 +59,13 @@ public class RateLimitAspect {
             }
         }
 
-        // 2. Build a unique cache key (e.g., "user:user_99:searchMethod")
         String cacheKey = callerKey + ":" + methodName;
         long windowMillis = rateLimit.unit().toMillis(rateLimit.window());
 
-        // 3. Check with the RateLimitService
         boolean allowed = rateLimitService.isAllowed(cacheKey, rateLimit.requests(), windowMillis);
 
-        // 4. Reject with HTTP 429 Too Many Requests if they exceed the limit
         if (!allowed) {
-            throw new ResponseStatusException(
-                    HttpStatus.TOO_MANY_REQUESTS,
-                    "Rate limit exceeded. Please try again later."
-            );
+            throw new RateLimitExceededException("Rate Limit Exceeded. Please try again later.");
         }
     }
 }
