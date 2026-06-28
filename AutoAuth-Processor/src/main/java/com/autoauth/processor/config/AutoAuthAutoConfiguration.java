@@ -4,6 +4,7 @@ import com.autoauth.processor.aop.RateLimitAspect;
 import com.autoauth.processor.blacklist.CafeTokenBlackList;
 import com.autoauth.processor.blacklist.TokenBlackList;
 import com.autoauth.processor.controller.JwksController;
+import com.autoauth.processor.exception.AutoAuthRateLimitExceptionResolver;
 import com.autoauth.processor.jwt.JwtGenerator;
 import com.autoauth.processor.jwt.JwtKeyProvider;
 import com.autoauth.processor.jwt.JwtValidator;
@@ -73,6 +74,12 @@ public class AutoAuthAutoConfiguration {
   @ConditionalOnMissingBean
   public RateLimitAspect rateLimitAspect(RateLimitService rateLimitService) {
     return new RateLimitAspect(rateLimitService);
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public AutoAuthRateLimitExceptionResolver autoAuthRateLimitExceptionResolver() {
+    return new AutoAuthRateLimitExceptionResolver();
   }
   
 }
