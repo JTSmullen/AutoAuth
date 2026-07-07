@@ -166,12 +166,6 @@ Demonstrates:
 </dependency>
 ```
 
-## Quick Start
-
-```java
-// Your example code here
-```
-
 ## 💡 Why AutoAuth Instead of Spring Authorization Server?
 Choose AutoAuth when you want:
 
