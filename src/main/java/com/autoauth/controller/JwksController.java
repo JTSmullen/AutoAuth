@@ -43,7 +43,7 @@ public class JwksController {
                     "kty", "RSA",
                     "use", "sig",
                     "alg", "RS256",
-                    "kid", "autoauth-default-key",
+                    "kid", keyProvider.getKid(),
                     "n", modulus,
                     "e", exponent
             );

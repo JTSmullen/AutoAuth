@@ -21,6 +21,7 @@ public class JwtGenerator {
     long expirationTimeMillis = System.currentTimeMillis() + (properties.getExpirationMinutes() * 60 * 1000);
 
     var builder = Jwts.builder()
+            .header().keyId(keyProvider.getKid()).and()
             .id(UUID.randomUUID().toString())
             .subject(user.userId())
             .claim("type", "access")
@@ -42,6 +43,7 @@ public class JwtGenerator {
     long expirationTimeMillis = System.currentTimeMillis() + (properties.getRefreshExpirationMinutes() * 60 * 1000);
 
     return Jwts.builder()
+            .header().keyId(keyProvider.getKid()).and()
             .id(UUID.randomUUID().toString())
             .subject(user.userId())
             .claim("type", "refresh")
