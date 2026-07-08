@@ -1,5 +1,7 @@
 package com.autoauth.util;
 
+import org.springframework.util.ResourceUtils;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.security.KeyFactory;
@@ -9,21 +11,19 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.stream.Collectors;
-import org.springframework.util.ResourceUtils;
 
 public class KeyLoader {
+
+    private static final String[] SUPPORTED_ALGORITHMS = {"RSA", "EC", "Ed25519", "EdDSA"};
 
     private static String resolveKeyContent(String input) {
         if (input == null || input.isBlank()) {
             return "";
         }
-
         String trimmedInput = input.trim();
-
         if (trimmedInput.contains("\n") || trimmedInput.contains("\r")) {
             return input;
         }
-
         if (trimmedInput.startsWith("classpath:") || trimmedInput.startsWith("file:")) {
             try {
                 File file = ResourceUtils.getFile(trimmedInput);
@@ -32,7 +32,6 @@ public class KeyLoader {
                 throw new IllegalArgumentException("Failed to read key file from location: " + trimmedInput, e);
             }
         }
-
         try {
             File file = new File(trimmedInput);
             if (file.exists() && file.isFile()) {
@@ -40,7 +39,6 @@ public class KeyLoader {
             }
         } catch (Exception ignored) {
         }
-
         return input;
     }
 
@@ -60,9 +58,16 @@ public class KeyLoader {
             String cleanedBase64 = cleanPem(pemKey);
             byte[] encoded = Base64.getDecoder().decode(cleanedBase64);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-            return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
+
+            for (String alg : SUPPORTED_ALGORITHMS) {
+                try {
+                    return KeyFactory.getInstance(alg).generatePrivate(keySpec);
+                } catch (Exception ignored) {
+                }
+            }
+            throw new IllegalArgumentException("Algorithm not supported or key format is invalid.");
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to load RSA Private Key. Ensure it is a valid PKCS8 PEM format.", e);
+            throw new IllegalArgumentException("Failed to load Private Key. Ensure it is a valid PKCS8 PEM format.", e);
         }
     }
 
@@ -71,9 +76,16 @@ public class KeyLoader {
             String cleanedBase64 = cleanPem(pemKey);
             byte[] encoded = Base64.getDecoder().decode(cleanedBase64);
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(encoded);
-            return KeyFactory.getInstance("RSA").generatePublic(keySpec);
+
+            for (String alg : SUPPORTED_ALGORITHMS) {
+                try {
+                    return KeyFactory.getInstance(alg).generatePublic(keySpec);
+                } catch (Exception ignored) {
+                }
+            }
+            throw new IllegalArgumentException("Algorithm not supported or key format is invalid.");
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to load RSA Public Key. Ensure it is a valid X509 PEM format.", e);
+            throw new IllegalArgumentException("Failed to load Public Key. Ensure it is a valid X509 PEM format.", e);
         }
     }
 }
