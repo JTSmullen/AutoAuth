@@ -1,6 +1,7 @@
 package com.autoauth.aop;
 
 import com.autoauth.annotation.RateLimit;
+import com.autoauth.annotation.UserQuota;
 import com.autoauth.exception.RateLimitExceededException;
 import com.autoauth.ratelimit.RateLimitService;
 import com.autoauth.util.AuthContext;
@@ -16,7 +17,10 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Aspect
 public class RateLimitAspect {
@@ -47,8 +51,22 @@ public class RateLimitAspect {
         String callerKey;
         Optional<String> userId = AuthContext.getCurrentUserId();
 
+        int maxRequests = rateLimit.fallbackRequests();
+
         if (userId.isPresent()) {
             callerKey = "user:" + userId.get();
+
+            Optional<List<String>> userRoles = AuthContext.getCurrentUserRoles();
+
+            OptionalInt highestLimit = Arrays.stream(rateLimit.value())
+                    .filter(quota -> userRoles.get().stream()
+                            .anyMatch(role -> role.equalsIgnoreCase(quota.role())))
+                    .mapToInt(UserQuota::maxRequests)
+                    .max();
+
+            if (highestLimit.isPresent()) {
+                maxRequests = highestLimit.getAsInt();
+            }
         } else {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
@@ -62,7 +80,7 @@ public class RateLimitAspect {
         String cacheKey = callerKey + ":" + methodName;
         long windowMillis = rateLimit.unit().toMillis(rateLimit.window());
 
-        boolean allowed = rateLimitService.isAllowed(cacheKey, rateLimit.requests(), windowMillis);
+        boolean allowed = rateLimitService.isAllowed(cacheKey, maxRequests, windowMillis);
 
         if (!allowed) {
             throw new RateLimitExceededException("Rate Limit Exceeded. Please try again later.");

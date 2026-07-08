@@ -28,7 +28,7 @@ public class AuthContext {
 
     }
 
-    public static Optional<List<String>> getCurrentUserRole(){
+    public static Optional<List<String>> getCurrentUserRoles(){
         return getCurrentUser()
                 .map(AutoAuthUser::roles);
     }

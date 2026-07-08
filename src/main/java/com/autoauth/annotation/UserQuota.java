@@ -8,6 +8,6 @@ import java.lang.annotation.*;
 public @interface UserQuota {
 
     String role();
-    int MaxRequests();
+    int maxRequests();
 
 }
