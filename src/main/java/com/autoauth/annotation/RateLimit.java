@@ -12,7 +12,7 @@ public @interface RateLimit {
 
     int fallbackRequests() default 5;
 
-    long window();
+    long window() default 1;
 
     TimeUnit unit() default TimeUnit.MINUTES;
 
