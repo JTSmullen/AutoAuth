@@ -4,6 +4,7 @@ import com.autoauth.model.AutoAuthUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
 import java.util.Optional;
 
 public class AuthContext {
@@ -25,6 +26,11 @@ public class AuthContext {
         return getCurrentUser()
                 .map(AutoAuthUser::userId);
 
+    }
+
+    public static Optional<List<String>> getCurrentUserRole(){
+        return getCurrentUser()
+                .map(AutoAuthUser::roles);
     }
 
     public static Optional<Object> getCustomClaims(String claimKey) {
