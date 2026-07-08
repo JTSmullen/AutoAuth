@@ -22,6 +22,8 @@ public class JwtGenerator {
 
     var builder = Jwts.builder()
             .header().keyId(keyProvider.getKid()).and()
+            .issuer(properties.getIssuer())
+            .audience().add(properties.getAudience()).and()
             .id(UUID.randomUUID().toString())
             .subject(user.userId())
             .claim("type", "access")
@@ -44,6 +46,8 @@ public class JwtGenerator {
 
     return Jwts.builder()
             .header().keyId(keyProvider.getKid()).and()
+            .issuer(properties.getIssuer())
+            .audience().add(properties.getAudience()).and()
             .id(UUID.randomUUID().toString())
             .subject(user.userId())
             .claim("type", "refresh")

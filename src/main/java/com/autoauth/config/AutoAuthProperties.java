@@ -22,12 +22,23 @@ public class AutoAuthProperties {
 
     private String jwtSecret;
 
+    private String issuer = "autoauth-default-issuer";
+    private String audience = "autoauth-default-audience";
+
     private long expirationMinutes = 15;
     private long refreshExpirationMinutes = 10080;
 
     private List<String> allowedOrigins = new ArrayList<>();
 
     private List<String> publicPaths = new ArrayList<>();
+
+    public String getIssuer() {return issuer;}
+
+    public void setIssuer(String issuer) {this.issuer = issuer;}
+
+    public String getAudience() {return audience;}
+
+    public void setAudience(String audience) {this.audience = audience;}
 
     public String getJwtSecret() { return jwtSecret; }
     public void setJwtSecret(String jwtSecret) { this.jwtSecret = jwtSecret; }

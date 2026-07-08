@@ -1,11 +1,14 @@
 package com.autoauth.jwt;
 
 import com.autoauth.blacklist.TokenBlackList;
+import com.autoauth.config.AutoAuthProperties;
 import com.autoauth.exception.TokenRevokedException;
 import com.autoauth.model.AutoAuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 
 import java.time.Duration;
@@ -16,10 +19,24 @@ import java.util.List;
 public class JwtValidator {
     private final JwtKeyProvider keyProvider;
     private final TokenBlackList blackList;
+    private final JwtParser jwtParser;
 
-    public JwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList) {
+    public JwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList, AutoAuthProperties properties) {
         this.keyProvider = keyProvider;
         this.blackList = blackList;
+
+        JwtParserBuilder parserBuilder = Jwts.parser()
+                .verifyWith(keyProvider.getPublicKey());
+
+        if (properties.getIssuer() != null && !properties.getIssuer().isBlank()) {
+            parserBuilder.requireIssuer(properties.getIssuer());
+        }
+
+        if (properties.getAudience() != null && !properties.getAudience().isBlank()) {
+            parserBuilder.requireAudience(properties.getAudience());
+        }
+
+        this.jwtParser = parserBuilder.build();
     }
 
     public AutoAuthUser validateAndExtractUser(String token) {
@@ -28,15 +45,13 @@ public class JwtValidator {
 
     public AutoAuthUser validateAndExtractUser(String token, String expectedType) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(keyProvider.getPublicKey())
-                    .build()
+            Claims claims = jwtParser
                     .parseSignedClaims(token)
                     .getPayload();
 
             String tokenType = claims.get("type", String.class);
             if (!expectedType.equals(tokenType)) {
-                throw new SecurityException("Invalid token type. Expected: : " + expectedType);
+                throw new SecurityException("Invalid token type. Expected: " + expectedType);
             }
 
             String jti = claims.getId();
@@ -55,6 +70,8 @@ public class JwtValidator {
             customClaims.remove(Claims.EXPIRATION);
             customClaims.remove(Claims.ISSUED_AT);
             customClaims.remove(Claims.ID);
+            customClaims.remove(Claims.ISSUER);
+            customClaims.remove(Claims.AUDIENCE);
             customClaims.remove("roles");
             customClaims.remove("type");
 
@@ -69,9 +86,7 @@ public class JwtValidator {
 
     public void revokeToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(keyProvider.getPublicKey())
-                    .build()
+            Claims claims = jwtParser
                     .parseSignedClaims(token)
                     .getPayload();
 

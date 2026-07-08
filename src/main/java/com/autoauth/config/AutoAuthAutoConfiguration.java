@@ -60,8 +60,8 @@ public class AutoAuthAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtValidator jwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList) {
-        return new JwtValidator(keyProvider, blackList);
+    public JwtValidator jwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList, AutoAuthProperties properties) {
+        return new JwtValidator(keyProvider, blackList, properties);
     }
 
     @Bean
