@@ -2,6 +2,8 @@ package com.autoauth.controller;
 
 import com.autoauth.annotation.PublicEndpoint;
 import com.autoauth.jwt.JwtKeyProvider;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,6 +11,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class JwksController {
@@ -21,7 +24,7 @@ public class JwksController {
 
     @PublicEndpoint
     @GetMapping("/.well-known/jwks.json")
-    public Map<String, Object> getJwks() {
+    public ResponseEntity<Map<String, Object>> getJwks() {
 
         try {
 
@@ -48,10 +51,14 @@ public class JwksController {
                     "e", exponent
             );
 
-            return Map.of("keys", List.of(jwk));
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
+                    .body(Map.of("keys", List.of(jwk)));
 
         } catch (Exception e) {
-            return Map.of("keys", List.of());
+            return ResponseEntity.ok()
+                    .cacheControl(CacheControl.noCache())
+                    .body(Map.of("keys", List.of()));
         }
 
     }
