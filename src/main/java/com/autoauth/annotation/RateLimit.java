@@ -1,11 +1,17 @@
 package com.autoauth.annotation;
 
 import java.lang.annotation.*;
+import java.util.concurrent.TimeUnit;
 
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RateLimit {
-    int maxRequests();
-    long windowMillis();
+
+    int requests();
+
+    long window();
+
+    TimeUnit unit() default TimeUnit.MINUTES;
+
 }

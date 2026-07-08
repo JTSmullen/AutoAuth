@@ -6,6 +6,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequiresRole {
+
     String[] value();
+
     boolean requireAll() default false;
+
 }

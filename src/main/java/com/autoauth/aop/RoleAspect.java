@@ -17,8 +17,8 @@ import java.util.List;
 @Aspect
 public class RoleAspect {
 
-    @Before("@within(com.autoauth.annotation.RequiresRole) " +
-            "|| @annotation(com.autoauth.annotation.RequiresRole)")
+    @Before("@within(com.autoauth.processor.annotation.RequiresRole) " +
+            "|| @annotation(com.autoauth.processor.annotation.RequiresRole)")
     public void checkRoles(JoinPoint joinPoint) {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
