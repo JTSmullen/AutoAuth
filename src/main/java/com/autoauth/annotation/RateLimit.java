@@ -8,7 +8,9 @@ import java.util.concurrent.TimeUnit;
 @Documented
 public @interface RateLimit {
 
-    int requests();
+    UserQuota[] value() default{};
+
+    int fallbackRequests() default 5;
 
     long window();
 
