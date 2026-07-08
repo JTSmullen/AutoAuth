@@ -27,7 +27,7 @@ public class RateLimitAspect {
         this.rateLimitService = rateLimitService;
     }
 
-    @Before("@within(com.autoauth.processor.annotation.RateLimit) || @annotation(com.autoauth.processor.annotation.RateLimit)")
+    @Before("@within(com.autoauth.annotation.RateLimit) || @annotation(com.autoauth.annotation.RateLimit)")
     public void checkRateLimit(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
