@@ -56,7 +56,7 @@ public class EndpointScanner {
 
                         for (String basePath : basePaths) {
                             for (String methodPath : methodMapping.value()) {
-                                publicPaths.add(cleanPath(basePath + methodPath));
+                                publicPaths.add(cleanPath(basePath + "/" + methodPath));
                             }
                         }
 
