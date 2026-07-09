@@ -100,7 +100,7 @@ public class SecurityFilterChainConfig {
         List<String> allowedOrigins = properties.getAllowedOrigins();
 
         if (allowedOrigins == null || allowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(List.of("*"));
+            configuration.setAllowedOriginPatterns(List.of("*"));
         } else {
             configuration.setAllowedOrigins(allowedOrigins);
         }
