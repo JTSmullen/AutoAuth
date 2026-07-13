@@ -12,13 +12,14 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Aspect
 public class RoleAspect {
 
-    @Before("@within(com.autoauth.processor.annotation.RequiresRole) " +
-            "|| @annotation(com.autoauth.processor.annotation.RequiresRole)")
+    @Before("@within(com.autoauth.annotation.RequiresRole) " +
+            "|| @annotation(com.autoauth.annotation.RequiresRole)")
     public void checkRoles(JoinPoint joinPoint) {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
@@ -49,7 +50,7 @@ public class RoleAspect {
         boolean hasAccess = false;
 
         if (requiresRole.requireAll()) {
-            hasAccess = userRoles.containsAll(requiredRoles);
+            hasAccess = new HashSet<>(userRoles).containsAll(requiredRoles);
         } else {
             for (String role : requiredRoles) {
                 if (userRoles.contains(role)) {

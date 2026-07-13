@@ -1,22 +1,28 @@
 package com.autoauth.ratelimit;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import java.time.Duration;
 
 public class RateLimitService {
-
-    private final Map<String, long[]> cache = new ConcurrentHashMap<>();
+    private final Cache<String, long[]> cache = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(15))
+            .build();
 
     public boolean isAllowed(String key, int maxRequests, long windowMillis) {
         long now = System.currentTimeMillis();
 
-        return cache.compute(key, (k, data) -> {
-            if (data == null || now > data[1]) {
-                return new long[]{1, now + windowMillis};
-            }
+        long[] data = cache.get(key, k -> new long[]{0, now + windowMillis});
 
+        if (now > data[1]) {
+            data[0] = 1;
+            data[1] = now + windowMillis;
+        } else {
             data[0]++;
-            return data;
-        })[0] <= maxRequests;
+        }
+
+        cache.put(key, data);
+        return data[0] <= maxRequests;
     }
 }
