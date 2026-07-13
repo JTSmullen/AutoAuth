@@ -71,7 +71,13 @@ public class RateLimitAspect {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                callerKey = "ip:" + request.getRemoteAddr();
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.isBlank()) {
+                    ip = request.getRemoteAddr();
+                } else {
+                    ip = ip.split(",")[0].trim();
+                }
+                callerKey = "ip:" + ip;
             } else {
                 callerKey = "ip:unknown";
             }
