@@ -8,4 +8,5 @@ public interface TokenBlackList {
 
     boolean isBlackListed(String jti);
 
+    boolean isUserBanned(String userId);
 }

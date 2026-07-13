@@ -61,6 +61,10 @@ public class JwtValidator {
 
             String userId = claims.getSubject();
 
+            if (userId != null && blackList.isUserBanned(userId)) {
+                throw new TokenRevokedException("User banned");
+            }
+
             @SuppressWarnings("unchecked")
             List<String> roles = claims.get("roles", List.class);
 
