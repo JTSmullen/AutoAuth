@@ -13,16 +13,16 @@ import java.util.concurrent.TimeUnit;
  *     {@code X-Forwareded-For}) when available.
  * </p>
  *
- * <h3>SaaS Tiering @amp; Quotas:</h3>
+ * <h2>SaaS Tiering @amp; Quotas:</h2>
  * By nesting {@link UserQuota} annotations inside {@link #value()} array
  * you can assign specific request thresholds based on user roles (such as
  * subscription tiers like {@code FREE}, {@code PREMIUM}, or {@code ENTERPRISE}).
  * If an authenticated user has multiple roles defined in the quotas, the rate
  * limited automatically applies the highest limit based on their roles.
  *
- * <h3>Usage Examples:</h3>
+ * <h2>Usage Examples:</h2>
  *
- * <h4>1. Basic Rate Limiting</h4>
+ * <h3>1. Basic Rate Limiting</h3>
  * Limits requests to 10 per minute per client (IP or UUID)
  * <pre>{@code
  * @RateLimit(fallbackRequests = 10, window = 1, unit = TimeUnit.MINUTES)
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * public List<Item> search() {...}
  * }</pre>
  *
- * <h4>2. Tier based SaaS rate limiting</h4>
+ * <h3>2. Tier based SaaS rate limiting</h3>
  * Users with the {@code PREMIUM} role are allowed 100 requests per  30 seconds
  * whereas users with {@code ENTERPRISE} are allowed 1,000. All other users
  * fallback to 5 requests:

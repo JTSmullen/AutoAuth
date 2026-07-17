@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  *     filter and do not require auth or auth cookie
  * </p>
  *
- * <h3>Usage Scopes:</h3>
+ * <h2>Usage Scopes:</h2>
  * <ul>
  *     <li><b>Method Level:</b> Apply {@code @PublicEndpoint}
  *     to a mapping method such as {@code @GetMapping} whitelists
@@ -19,9 +19,9 @@ import java.lang.annotation.*;
  *     all request paths mapped within aforementioned controller class</li>
  * </ul>
  *
- * <h3>Usage Examples:</h3>
+ * <h2>Usage Examples:</h2>
  *
- * <h4>1. Method-level whitelisting</h4>
+ * <h3>1. Method-level whitelisting</h3>
  * <pre>{@code
  * @RestController
  * @RequestMapping("/api/users")
@@ -36,7 +36,7 @@ import java.lang.annotation.*;
  *      public void register() {...}
  * }}</pre>
  *
- * <h4>2. Class-level whitelisting</h4>
+ * <h3>2. Class-level whitelisting</h3>
  * <pre>{@code
  * @PublicEndpoint
  * @RestController

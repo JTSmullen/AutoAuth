@@ -12,7 +12,7 @@ import java.lang.annotation.*;
  *     security chains, aspects, and services to secure the app
  * </p>
  *
- * <h3>Bootstrapped Features:</h3>
+ * <h2>Bootstrapped Features:</h2>
  * <ul>
  *     <li><b>Stateless Security Filter Chain:</b> Auto secure all endpoints
  *     except those marked with {@link PublicEndpoint} or those
@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  *     at {@code /.well-known/jwks.json} for public key retrieval.</li>
  * </ul>
  *
- * <h3>Usage Example:</h3>
+ * <h2>Usage Example:</h2>
  * <pre>{@code
  * @SpringBootApplication
  * @EnableAutoAuth
