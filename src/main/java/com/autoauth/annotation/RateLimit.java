@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  *     {@code X-Forwareded-For}) when available.
  * </p>
  *
- * <h2>SaaS Tiering @amp; Quotas:</h2>
+ * <h2>SaaS Tiering &amp; Quotas:</h2>
  * By nesting {@link UserQuota} annotations inside {@link #value()} array
  * you can assign specific request thresholds based on user roles (such as
  * subscription tiers like {@code FREE}, {@code PREMIUM}, or {@code ENTERPRISE}).

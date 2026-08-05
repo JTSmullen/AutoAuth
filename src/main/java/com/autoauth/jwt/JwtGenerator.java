@@ -9,6 +9,8 @@ import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import java.security.PrivateKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class JwtGenerator {
@@ -44,6 +46,29 @@ public class JwtGenerator {
                 .compact();
     }
 
+    public String generateTaskToken(AutoAuthUser user, long expirationMinutes) {
+        long expirationTimeMillis = System.currentTimeMillis() + (expirationMinutes * 60 * 1000);
+
+        var builder = Jwts.builder()
+                .header().keyId(keyProvider.getKid()).and()
+                .issuer(properties.getIssuer())
+                .audience().add(properties.getAudience()).and()
+                .id(UUID.randomUUID().toString())
+                .subject(user.userId())
+                .claim("type", "task")
+                .claim("roles", user.roles())
+                .issuedAt(new Date())
+                .expiration(new Date(expirationTimeMillis));
+
+        if (user.customClaims() != null) {
+            user.customClaims().forEach(builder::claim);
+        }
+
+        return builder
+                .signWith(keyProvider.getPrivateKey(),
+                        determineSigningAlgorithm(keyProvider.getPrivateKey()))
+                .compact();
+    }
     public String generateRefreshToken(AutoAuthUser user) {
 
         long expirationTimeMillis = System.currentTimeMillis() + (properties.getRefreshExpirationMinutes() * 60 * 1000);
