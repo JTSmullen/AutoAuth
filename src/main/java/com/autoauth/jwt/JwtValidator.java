@@ -42,7 +42,6 @@ public class JwtValidator {
     public AutoAuthUser validateAndExtractUser(String token) {
         return validateAndExtractUser(token, "access");
     }
-    public AutoAuthUser validateAndExtractUserTask(String token) { return validateAndExtractUser(token, "task"); }
 
     public AutoAuthUser validateAndExtractUser(String token, String expectedType) {
         try {

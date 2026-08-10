@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
  * @see com.autoauth.aop.RateLimitAspect
  * @since 1.0.0
  */
+
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
