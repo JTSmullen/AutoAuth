@@ -18,6 +18,11 @@ public class EndpointScanner {
         this.applicationContext = applicationContext;
     }
 
+    /**
+     * Finds all paths marked with the {@code @PublicEndpoint} annotation to be whitelisted.
+     *
+     * @return List of Paths as strings marked with the aforementioned.
+     */
     public List<String> getPublicPaths() {
 
         List<String> publicPaths = new ArrayList<>();
@@ -36,6 +41,7 @@ public class EndpointScanner {
 
             boolean isClassPublic = AnnotatedElementUtils.hasAnnotation(beanType, PublicEndpoint.class);
 
+            // whitelist entire controller class if class marked with @PublicEndpoint
             if (isClassPublic) {
 
                 for (String basePath : basePaths) {
@@ -52,6 +58,7 @@ public class EndpointScanner {
 
                     RequestMapping methodMapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 
+                    // create the exact path string
                     if (methodMapping != null && methodMapping.value().length > 0) {
 
                         for (String basePath : basePaths) {
@@ -78,6 +85,9 @@ public class EndpointScanner {
 
     }
 
+    // Helper method to clean // and / in path strings since spring lets you start with /api/v3
+    // which would throw off the scanner from the path since spring adds / automatically would
+    // end up with a double slash
     private String cleanPath(String path) {
         return path.replaceAll("//+", "/");
     }
