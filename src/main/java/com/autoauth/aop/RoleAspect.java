@@ -15,9 +15,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * Aspect that intercepts methods or classes annotated with {@link RequiresRole}
+ * Resolves the calling user's roles and checks if they have access with {@link #validateRoles(RequiresRole)}
+ */
 @Aspect
 public class RoleAspect {
 
+    /**
+     * If the Endpoint has {@code @RequiresRole} annotation we check the request to see if
+     * the user has the required minimum role to hit that endpoint.
+     *
+     * @param joinPoint metadata of the intercepted method
+     */
     @Before("@within(com.autoauth.annotation.RequiresRole) " +
             "|| @annotation(com.autoauth.annotation.RequiresRole)")
     public void checkRoles(JoinPoint joinPoint) {
@@ -25,6 +35,7 @@ public class RoleAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
+        // fetch the spring bean instance
         Class<?> targetClass = joinPoint.getTarget().getClass();
 
         RequiresRole annotation = AnnotatedElementUtils.findMergedAnnotation(method, RequiresRole.class);
@@ -34,11 +45,18 @@ public class RoleAspect {
         }
 
         if (annotation != null) {
+            // pass the context of user and method to the role checker
             validateRoles(annotation);
         }
 
     }
 
+    /**
+     * enforces the RBAC by checking to see if you have at least the minimum role to
+     * hit said endpoint.
+     *
+     * @param requiresRole method metadata that has RBAC to check
+     */
     private void validateRoles(RequiresRole requiresRole) {
 
         List<String> userRoles = AuthContext.getCurrentUser()
@@ -47,8 +65,10 @@ public class RoleAspect {
 
         List<String> requiredRoles = Arrays.asList(requiresRole.value());
 
+        // start with 0 trust
         boolean hasAccess = false;
 
+        // if you have role or higher role return true and let traffic through
         if (requiresRole.requireAll()) {
             hasAccess = new HashSet<>(userRoles).containsAll(requiredRoles);
         } else {
@@ -60,6 +80,7 @@ public class RoleAspect {
             }
         }
 
+        // if not access is found throw 403 http code
         if (!hasAccess) {
             throw new AccessDeniedException("Access Denied: User lacks required role");
         }
