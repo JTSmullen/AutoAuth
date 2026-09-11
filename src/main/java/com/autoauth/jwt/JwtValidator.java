@@ -11,19 +11,26 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
 public class JwtValidator {
+
+    private static final Duration CLOCK_SKEW = Duration.ofSeconds(30);
+
     private final JwtKeyProvider keyProvider;
     private final TokenBlackList blackList;
     private final JwtParser jwtParser;
+    private final Clock clock;
 
-    public JwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList, AutoAuthProperties properties) {
+    public JwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList,
+                        AutoAuthProperties properties, Clock clock) {
         this.keyProvider = keyProvider;
         this.blackList = blackList;
+        this.clock = clock;
 
         JwtParserBuilder parserBuilder = Jwts.parser()
                 .verifyWith(keyProvider.getPublicKey());

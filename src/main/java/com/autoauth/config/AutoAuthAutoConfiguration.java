@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
 
 @AutoConfiguration
 @EnableConfigurationProperties(AutoAuthProperties.class)
@@ -60,8 +61,8 @@ public class AutoAuthAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public JwtValidator jwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList, AutoAuthProperties properties) {
-        return new JwtValidator(keyProvider, blackList, properties);
+    public JwtValidator jwtValidator(JwtKeyProvider keyProvider, TokenBlackList blackList, AutoAuthProperties properties, Clock clock) {
+        return new JwtValidator(keyProvider, blackList, properties, clock);
     }
 
     @Bean
