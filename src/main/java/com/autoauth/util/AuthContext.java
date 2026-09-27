@@ -17,7 +17,7 @@ public class AuthContext {
      *      JWT.
      *  </p>
      *
-     *  <h2>Sub Methods:</h2>
+     *  <b>Sub Methods:</b>
      *  <ul>
      *      <li><b>Use {@link #getCurrentUserId()} if you only need the User ID.</b></li>
      *      <li><b>Use {@link #getCurrentUserRoles()} if you only need the User Roles.</b></li>
