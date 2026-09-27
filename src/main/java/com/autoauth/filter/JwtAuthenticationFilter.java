@@ -51,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 
         try {
 
-            AutoAuthUser user = jwtValidator.validateAndExtractUser(token);
+            AutoAuthUser user = jwtValidator.validateAccessToken(token);
 
             List<SimpleGrantedAuthority> authorities = user.roles().stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
