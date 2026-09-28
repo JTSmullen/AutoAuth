@@ -36,6 +36,12 @@ public class AutoAuthAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean(Clock.class)
+    public Clock autoAuthClock() {
+        return Clock.systemUTC();
+    }
+
+    @Bean
     @ConditionalOnMissingBean
     public RoleAspect roleAspect() {
         return new RoleAspect();
