@@ -5,6 +5,8 @@ import com.autoauth.config.AutoAuthProperties;
 import com.autoauth.exception.JwtValidationException;
 import com.autoauth.exception.TokenRevokedException;
 import com.autoauth.model.AutoAuthUser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -22,11 +24,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class JwtValidator {
 
@@ -37,6 +35,8 @@ public class JwtValidator {
     private final AutoAuthProperties properties;
     private final Clock clock;
     private final JwtParser jwtParser;
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     // DI constructor including clock now
     public JwtValidator(JwtKeyProvider keyProvider,
@@ -108,17 +108,9 @@ public class JwtValidator {
             throw new JwtValidationException("JWT string must not be null or blank");
         }
 
+        preValidateJwtHeader(token);
+
         try {
-            // verify valid header
-//            String[] parts = token.split("\\.");
-//            if (parts.length != 3) {
-//                throw new JwtValidationException("Malformed JWT format"); // ~0.001ms
-//            }
-//
-//            String kid = extractUnverifiedKid(parts[0]);
-//            if (kid != null && keyProvider.getPublicKey(kid) == null) {
-//                throw new JwtValidationException("Unknown kid"); // ~0.005ms — zero crypto done!
-//            }
 
             Jws<Claims> jws = jwtParser.parseSignedClaims(token);
             Claims claims = jws.getPayload();
@@ -241,5 +233,50 @@ public class JwtValidator {
             throw new JwtValidationException("Algorithm mismatch: expected ECDSA, got " + headerAlg);
 
         }
+    }
+
+    private void preValidateJwtHeader(String token) {
+
+        int firstDot = token.indexOf('.');
+        int secondDot = token.indexOf('.', firstDot + 1);
+
+        if (firstDot == -1 || secondDot == -1 || token.indexOf('.', secondDot + 1) != -1) {
+
+            throw new JwtValidationException("Invalid JWT: Must have exactly 3 base64url segments");
+
+        }
+
+        String rawHeaderBase64 = token.substring(0, firstDot);
+
+        try {
+
+            byte[] decodedHeader = Base64.getUrlDecoder().decode(rawHeaderBase64);
+            JsonNode headerJson = OBJECT_MAPPER.readTree(decodedHeader);
+
+            JsonNode algNode = headerJson.get("alg");
+
+            if (algNode == null || "none".equalsIgnoreCase(algNode.asText())) {
+                throw new JwtValidationException("Tokens with algorithm 'none' are rejected");
+            }
+
+            JsonNode kidNode = headerJson.get("kid");
+
+            if (kidNode != null && !kidNode.isNull() && !kidNode.asText().isBlank()) {
+
+                String kid = kidNode.asText();
+
+                if (keyProvider.getPublicKey(kid) == null) {
+                    throw new JwtValidationException("Unknown Key ID (kid): " + kid);
+                }
+            }
+
+        } catch (IllegalArgumentException e) {
+            throw new JwtValidationException("Malformed JWT: Header contains invalid Base64url encoding", e);
+        } catch (JwtValidationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new JwtValidationException("Malformed JWT header format", e);
+        }
+
     }
 }
