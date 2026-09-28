@@ -25,10 +25,12 @@ public class RedisTokenBlackList implements TokenBlackList {
         redisTemplate.opsForValue().set("banned:" + userId, "true", duration);
     }
 
+    @Override
     public void unbanUser(String userId) {
         redisTemplate.delete("banned:" + userId);
     }
 
+    @Override
     public boolean isUserBanned(String userId) {
         return redisTemplate.hasKey("banned:" + userId);
     }
