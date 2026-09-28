@@ -109,6 +109,17 @@ public class JwtValidator {
         }
 
         try {
+            // verify valid header
+//            String[] parts = token.split("\\.");
+//            if (parts.length != 3) {
+//                throw new JwtValidationException("Malformed JWT format"); // ~0.001ms
+//            }
+//
+//            String kid = extractUnverifiedKid(parts[0]);
+//            if (kid != null && keyProvider.getPublicKey(kid) == null) {
+//                throw new JwtValidationException("Unknown kid"); // ~0.005ms — zero crypto done!
+//            }
+
             Jws<Claims> jws = jwtParser.parseSignedClaims(token);
             Claims claims = jws.getPayload();
 

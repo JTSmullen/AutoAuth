@@ -28,6 +28,8 @@ public class AutoAuthProperties {
     private long expirationMinutes = 15;
     private long refreshExpirationMinutes = 10080;
 
+    private int preAuthRateLimit = 50;
+
     private List<String> allowedOrigins = new ArrayList<>();
 
     private List<String> publicPaths = new ArrayList<>();
@@ -63,4 +65,8 @@ public class AutoAuthProperties {
 
     public long getRefreshExpirationMinutes() { return refreshExpirationMinutes; }
     public void setRefreshExpirationMinutes(long refreshExpirationMinutes) { this.refreshExpirationMinutes = refreshExpirationMinutes; }
+
+    public int getPreAuthRateLimit() {return preAuthRateLimit;}
+
+    public void setPreAuthRateLimit(int preAuthRateLimit) {this.preAuthRateLimit = preAuthRateLimit;}
 }
